@@ -1,0 +1,52 @@
+CREATE TEMP TABLE temp_runner_orders AS
+SELECT
+  order_id,
+  runner_id,
+  CASE 
+    WHEN pickup_time = 'null' OR pickup_time = '' THEN NULL
+    ELSE pickup_time::TIMESTAMP
+  END AS pickup_time,
+  CASE 
+    WHEN distance = 'null' OR distance = '' THEN NULL
+    ELSE REGEXP_REPLACE(distance, '[^0-9\.]', '', 'g')::NUMERIC
+  END AS distance,
+  CASE 
+    WHEN duration = 'null' OR duration = '' THEN NULL
+    ELSE REGEXP_REPLACE(duration, '[^0-9]', '', 'g')::NUMERIC
+  END AS duration,
+  CASE 
+    WHEN cancellation = 'null' OR cancellation = '' THEN NULL
+    ELSE cancellation
+  END AS cancellation
+FROM runner_orders;
+
+UPDATE runner_orders r
+SET
+  pickup_time = t.pickup_time,
+  distance = t.distance,
+  duration = t.duration,
+  cancellation = t.cancellation
+FROM temp_runner_orders t
+WHERE r.order_id = t.order_id;
+
+DROP TABLE IF EXISTS temp_runner_orders;
+
+---------------------------------------------------------------------
+
+CREATE TEMP TABLE temp_customer_orders AS
+SELECT
+  order_id,
+  customer_id,
+  pizza_id,
+  order_time,
+  unnest(
+    CASE 
+      WHEN exclusions = 'null' OR exclusions = '' THEN ARRAY[NULL]
+      ELSE regexp_split_to_array(exclusions, ',\s*')
+    END)::INTEGER AS exclusion_topping_id,
+  unnest(
+    CASE 
+      WHEN extras = 'null' OR extras = '' OR extras = 'Nan' THEN ARRAY[NULL]
+      ELSE regexp_split_to_array(extras, ',\s*')
+    END)::INTEGER AS extra_topping_id
+FROM customer_orders;
