@@ -38,6 +38,33 @@ SELECT
   order_id,
   customer_id,
   pizza_id,
+  CASE
+    WHEN exclusions = 'null' OR exclusions = '' THEN NULL
+    ELSE exclusions
+  END AS exclusions,
+  CASE
+    WHEN extras = 'null' OR extras = '' OR extras = 'NaN' THEN NULL
+    ELSE extras
+  END AS extras,
+  order_time
+FROM customer_orders;
+
+UPDATE customer_orders c
+SET
+  exclusions = t.exclusions,
+  extras = t.extras
+FROM temp_customer_orders t
+WHERE c.ctid = t.ctid;
+
+DROP TABLE IF EXISTS temp_customer_orders;
+
+---------------------------------------------------------------------
+
+CREATE TEMP TABLE temp_customer_orders2 AS
+SELECT
+  order_id,
+  customer_id,
+  pizza_id,
   order_time,
   unnest(
     CASE 
