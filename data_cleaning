@@ -50,3 +50,11 @@ SELECT
       ELSE regexp_split_to_array(extras, ',\s*')
     END)::INTEGER AS extra_topping_id
 FROM customer_orders;
+
+---------------------------------------------------------------------
+
+CREATE TEMP TABLE temp_pizza_recipe_toppings AS
+SELECT
+  pizza_id,
+  unnest(regexp_split_to_array(toppings, ',\s*'))::INTEGER AS topping_id
+FROM pizza_recipes;
