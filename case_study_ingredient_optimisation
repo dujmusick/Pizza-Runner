@@ -1,0 +1,27 @@
+--1. What are the standard ingredients for each pizza?
+
+SELECT prt.pizza_id, pt.topping_name
+FROM temp_pizza_recipe_toppings prt
+JOIN pizza_toppings pt
+ON prt.topping_id = pt.topping_id
+ORDER BY 1;
+
+--2. What was the most commonly added extra?
+
+SELECT pizza_toppings.topping_name, tco2.extra_topping_id, COUNT(tco2.*)
+FROM temp_customer_orders2 tco2
+JOIN pizza_toppings
+	ON tco2.extra_topping_id = pizza_toppings.topping_id
+WHERE tco2.extra_topping_id IS NOT NULL
+GROUP BY 1, 2
+ORDER BY 3 DESC;
+
+--3. What was the most common exclusion?
+
+SELECT pizza_toppings.topping_name, tco2.exclusion_topping_id, COUNT(tco2.*)
+FROM temp_customer_orders2 tco2
+JOIN pizza_toppings
+	ON tco2.exclusion_topping_id = pizza_toppings.topping_id
+WHERE tco2.exclusion_topping_id IS NOT NULL
+GROUP BY 1, 2
+ORDER BY 3 DESC;
